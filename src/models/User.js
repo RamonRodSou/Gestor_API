@@ -26,7 +26,7 @@ const UserSchema = new Schema({
     id: { type: Number, required: true },
     position: { type: String, required: true }
   },
-  password: { type: String, required: true }
+  password_hash: { type: String, required: true }
 });
 
 const UserModel = model('User', UserSchema);

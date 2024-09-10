@@ -11,6 +11,9 @@ router.get('/teste', (req, res) => {
 
 
 router.post('/users', UserController.store);
+
+
+
 router.get('/users', UserController.index);
 router.get('/users/:id', UserController.show);
 router.put('/users/:id', UserController.update);

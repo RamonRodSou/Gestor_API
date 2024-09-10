@@ -1,17 +1,17 @@
 
 import * as yup from 'yup';
+import bcrypt from 'bcryptjs'; 
 import UserModel from '../models/User';
 
 class UserController {
   async store(req, res) {
     const {
-      registrationNumber, registrationDate, firstName, lastName, email,
+      registrationDate, firstName, lastName, email,
       phone, cpf, birthDate, maritalStatus, marriageDate, isBaptized,
-      baptismDate, father, mother, role, position, password
+      baptismDate, father, mother, role, position, password, 
     } = req.body;
 
     const schema = yup.object().shape({
-      registrationNumber: yup.number().required(),
       registrationDate: yup.date().required(),
       firstName: yup.string().required(),
       lastName: yup.string().required(),
@@ -37,19 +37,23 @@ class UserController {
         position: yup.string().required()
       }).required(),
       password: yup.string().required()
+
     });
 
     try {
+
       await schema.validate(req.body);
 
+      const password_hash = await bcrypt.hash(password, 8);
       const lastUser = await UserModel.findOne().sort({ registrationNumber: -1 });
-      const registrationNumber = lastUser ? lastUser.registrationNumber + 1 : 100000;
+      const newRegistrationNumber = lastUser ? lastUser.registrationNumber + 1 : 100000;
       let user = await UserModel.findOne({ email });
+
       if (!user) {
         user = await UserModel.create({
-          registrationNumber, registrationDate, firstName, lastName, email,
+          registrationNumber: newRegistrationNumber, registrationDate, firstName, lastName, email,
           phone, cpf, birthDate, maritalStatus, marriageDate, isBaptized,
-          baptismDate, father, mother, role, position, password
+          baptismDate, father, mother, role, position, password_hash 
         });
       }
 
@@ -89,13 +93,12 @@ class UserController {
   async update(req, res) {
     const { id } = req.params;
     const {
-      registrationNumber, registrationDate, firstName, lastName, email,
+      registrationDate, firstName, lastName, email,
       phone, cpf, birthDate, maritalStatus, marriageDate, isBaptized,
       baptismDate, father, mother, role, position, password
     } = req.body;
 
     const schema = yup.object().shape({
-      registrationNumber: yup.number().required(),
       registrationDate: yup.date().required(),
       firstName: yup.string().required(),
       lastName: yup.string().required(),
