@@ -1,4 +1,5 @@
 import { Schema, model } from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 const UserSchema = new Schema({
   registrationNumber: { type: Number, required: true },
@@ -14,7 +15,7 @@ const UserSchema = new Schema({
     description: { type: String, required: true }
   },
   marriageDate: { type: Date, default: null },
-  isBaptized: { type: Boolean, required: true },
+  isBaptized: { type: Boolean, required: true }, 
   baptismDate: { type: Date, default: null },
   father: { type: String, required: true },
   mother: { type: String, required: true },
@@ -27,7 +28,12 @@ const UserSchema = new Schema({
     position: { type: String, required: true }
   },
   password_hash: { type: String, required: true }
+
 });
+
+UserSchema.methods.checkPassword = function(password) {
+  return bcrypt.compare(password, this.password_hash);
+}
 
 const UserModel = model('User', UserSchema);
 

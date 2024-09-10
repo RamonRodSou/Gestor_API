@@ -1,30 +1,49 @@
-import jwt from 'jsonwebtoken'
-import User from "../models/User"
-import * as yup from 'yup'
+import jwt from 'jsonwebtoken';
+import * as yup from 'yup';
+import UserModel from '../models/User';
+import authConfig from '../config/auth';
 
 class SessionController {
-
   async store(req, res) {
-
-    const { name, email, password } = req.body
+    const { email, password } = req.body;
 
     const schema = yup.object().shape({
-      name: yup.string().required(),
       email: yup.string().email().required(),
-      password: yup.string().required()
-    })
+      password: yup.string().required(),
+    });
 
-    let user = await User.findOne({ name, email, password })
+    try {
+      await schema.validate(req.body);
+      const user = await UserModel.findOne({ email });
 
-    if (!(await schema.isValid(req.body))) {
-      return res.status(400).json({ error: 'Email ou Senha Invalido!' })
+      if (!user) {
+        return res.status(401).json({ error: 'Usuário não encontrado!' });
+      }
+
+      const isPasswordValid = await user.checkPassword(password);
+
+      if (!isPasswordValid) {
+        return res.status(401).json({ error: 'Senha inválida' });
+      }
+
+      const token = jwt.sign(
+        { id: user._id, email: user.email },
+        authConfig.JWT_SECRET,
+        { expiresIn: authConfig.expiresIn }
+      );
+
+      return res.json({
+        UserModel: {
+          registrationNumber: user.registrationNumber,
+          firstName: user.firstName,
+          email: user.email,
+        },
+        token,
+      });
+    } catch (error) {
+      return res.status(400).json({ error: error.message });
     }
-
-    // verifica se o usuario já existe
-    if (!user) user = await User.create({ name, email, password })
-
-    return res.json(user)
   }
 }
 
-export default new SessionController()
+export default new SessionController();

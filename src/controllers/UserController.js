@@ -65,6 +65,7 @@ class UserController {
     } catch (error) {
       return res.status(400).json({ error: error.message });
     }
+
   }
 
   async index(req, res) {
@@ -143,7 +144,9 @@ class UserController {
     } catch (error) {
       return res.status(400).json({ error: error.message });
     }
+
   }
+
 
   async delete(req, res) {
     const { id } = req.params;
