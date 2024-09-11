@@ -95,7 +95,7 @@ class UserController {
     const {
       registrationDate, firstName, lastName, email,
       phone, cpf, birthDate, maritalStatus, marriageDate, isBaptized,
-      baptismDate, father, mother, role, position, oldPassword, password
+      baptismDate, father, mother, role, position, oldPassword, password,
     } = req.body;
 
     const schema = yup.object().shape({
@@ -123,8 +123,17 @@ class UserController {
         id: yup.number().required(),
         position: yup.string().required()
       }).required(),
-      oldPassword: yup.string(),
-      password: yup.string().required().min(8)
+      oldPassword: yup.string().min(8),
+      password: yup.string()
+        .min(8)
+        .when('oldPassword', (oldPassword, field) =>
+          oldPassword ? field.required() : field
+
+        ),
+      confirmPassword: yup.string().when('password', (password, field) =>
+        password ? field.required().oneOf([yup.ref('password')]) : field
+      ),
+
     });
 
     try {

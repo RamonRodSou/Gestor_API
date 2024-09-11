@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import routes from './routes';
 import connectDatabase from './config/database'; 
+
 class App {
   constructor() {
     this.server = express();
